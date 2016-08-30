@@ -6,7 +6,7 @@
 	</head>
 	<body>
 		<h1>Exemplo Canvas 01</h1>
-		<canvas height="544" width="672"></canvas>	
+		<canvas height="544" width="672"></canvas>
 
 		<script>
 		var SIZE = 32;
@@ -71,17 +71,30 @@
 					setTimeout(desenhaTudo, 200);
 			}
 			function geraPortas(){
-				linha = 4;
-				coluna = 4;
-
-				for(var i = 0; i <= 3; i++){
-					mapa[linha][1+Math.floor(21*Math.random())] = 0;
-					linha += 4;
+				var a = 0;
+				for(var l = 4; l < 16; l+=4){
+					for(var c = 1; c < 19; c+=4){
+						if(mapa[l][c]==1){
+							a++;
+						}
+						if(a==1){
+							mapa[l][1+c-(Math.floor(2*Math.random()))] = 0;
+							a = 0;
+						}
+					}
 				}
-				for(var i = 0; i <= 4; i++){
-					mapa[1+Math.floor(17*Math.random())][coluna] = 0;
-					coluna += 4;
-				}			
+				a = 0;
+				for(var l = 1; l < 16; l+=4){
+					for(var c = 4; c < 19; c+=4){
+						if(mapa[l][c]==1){
+							a++;
+						}
+						if(a==1){
+							mapa[1+l-(Math.floor(2*Math.random()))][c] = 0;
+							a = 0;
+						}
+					}
+				}
 			}
 			function desenharPC(){
 				/*ctx.fillStyle = "blue";
@@ -123,7 +136,7 @@
 					return;
 				}
 				eny.s[l][c] = a;
-				
+
 				montaS(l-1,c, a+1);
 				montaS(l+1,c, a+1);
 				montaS(l,c-1, a+1);
@@ -191,10 +204,10 @@
 							//			img, sy, sy , sw, sh, dx, dy, dw, dh
 							ctx.drawImage(imagemPedra, 0*32,0*32, 32, 32,
 										  				c*SIZE,l*SIZE, SIZE,SIZE);
-						}		
+						}
 					}
 				}
-				
+
 			}
 			function moveDireita() {
 				if(mapa[pc.y][pc.x+1]==0) pc.x++;
