@@ -6,7 +6,7 @@
 	</head>
 	<body>
 		<h1>Exemplo Canvas 01</h1>
-		<canvas height="544" width="672"></canvas>	
+		<canvas height="544" width="672"></canvas>
 
 		<script>
 		var SIZE = 32;
@@ -23,34 +23,24 @@
 		var imagemGhost = new Image();
 		imagemGhost.src = "images/ghost.png";
 
+		var imagemEscada = new Image();
+ 		imagemEscada.src = "images/escada.png";
+
+		var imagemEspadaChao = new Image();
+		imagemEspadaChao.src = "images/espadachao.png"
+
 
 		//17 linhas por 21 colunas
-		var mapa =[
-			[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-			[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
-			[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
-			[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
-			[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-			[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
-			[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
-			[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
-			[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-			[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
-			[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
-			[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
-			[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-			[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
-			[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
-			[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
-			[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-		];
+		var mapa =[];
+		iniciaMapa();
 
 			var tela = document.querySelector("canvas");
 			var ctx = tela.getContext("2d");
 			var pc = {
 				x : 1,
 				y : 2,
-				pose : 4
+				pose : 4,
+				espada : false
 			};
 			var eny = {
 				x : 18,
@@ -58,30 +48,121 @@
 				s : [],
 				pose : 0
 			}
+			var espada = {
+				x: 0,
+				y: 0
+			}
+
 			iniciaS();
 			setTimeout(desenhaTudo, 200);
 			montaS(pc.y,pc.x, 1);
 			//desenhaS();
 			geraPortas();
+			geraEspada();
+
+			function iniciaMapa(){
+				mapa =[
+					[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+					[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+					[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+					[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+					[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+					[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+					[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+					[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+					[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+					[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+					[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+					[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+					[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+					[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+					[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+					[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+					[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+				];
+			}
 
 			function desenhaTudo(){
 					desenharMapa();
 					desenharPC();
 					desenharEny();
+					desenharEspada();
 					setTimeout(desenhaTudo, 200);
 			}
-			function geraPortas(){
-				linha = 4;
-				coluna = 4;
 
-				for(var i = 0; i <= 3; i++){
-					mapa[linha][1+Math.floor(21*Math.random())] = 0;
-					linha += 4;
+			function geraPortas(){
+				geraPH();
+				geraPV();
+			}
+			function geraPV() {
+				var a = 0;
+				var random;
+				for(var l = 1; l < 16; l+=4){
+					for(var c = 4; c < 19; c+=4){
+						if(mapa[l][c]==1){
+							a++;
+						}
+						if(a==1){
+							random = Math.floor(3*Math.random());
+							if(random == 0){
+								mapa[l][c] = 0;
+							}else if(random == 1){
+								mapa[l+2][c] = 0;
+							}else if(random == 2){
+								mapa[l+1][c] = 0;
+							}
+							a = 0;
+						}
+					}
 				}
-				for(var i = 0; i <= 4; i++){
-					mapa[1+Math.floor(17*Math.random())][coluna] = 0;
-					coluna += 4;
-				}			
+			}
+			function geraPH() {
+				var a = 0;
+				var random;
+				var porta = 0;
+				for(var l = 4; l < 16; l+=4){
+					for(var c = 1; c < 19; c+=4){
+						if(mapa[l][c]==1){
+							a++;
+						}
+						if(a==1){
+							random = Math.floor(4*Math.random());
+							if(random == 0){
+								mapa[l][c] = 0;
+								porta++;
+							}else if(random == 1){
+								mapa[l][c+2] = 0;
+								porta++;
+							}else if(random == 2){
+								mapa[l][c+1] = 0;
+								porta++;
+							}else{
+								mapa[l][c] = 1;
+							}
+							a = 0;
+						}
+					}
+					if(porta<1){
+						iniciaMapa();
+						geraPH();
+					}
+					porta = 0;
+				}
+			}
+			function geraEspada(){
+				do {
+ 						espada.x = Math.floor(21*Math.random());
+ 						espada.y = Math.floor(17*Math.random());
+  			} while (mapa[espada.y][espada.x]==1);
+				if(espada.x - pc.x < 4 && espada.y - pc.y < 4 ){
+					geraEspada();
+				}
+			}
+			function desenharEspada(){
+				if(pc.espada==false){
+					ctx.drawImage(imagemEspadaChao, 0*32,0*32, 32, 32,
+													espada.x*SIZE,espada.y*SIZE, SIZE,SIZE);
+				}
 			}
 			function desenharPC(){
 				/*ctx.fillStyle = "blue";
@@ -104,9 +185,9 @@
 											eny.x*32-4, eny.y*32-7, 40, 46);
 			}
 			function iniciaS(){
-				for(var l =0; l < 15; l++){
+				for(var l =0; l < 17; l++){
 					eny.s[l] = [];
-					for(var c = 0; c <20; c++){
+					for(var c = 0; c <21; c++){
 						if(mapa[l][c]==1){
 							eny.s[l][c] = -1;
 						}else {
@@ -116,14 +197,14 @@
 				}
 			}
 			function montaS(l,c,a){
-				if(c<0 || l < 0 || c >=20 || l >=15){
+				if(c<0 || l < 0 || c >=21 || l >=17){
 					return;
 				}
 				if(eny.s[l][c]<=a){
 					return;
 				}
 				eny.s[l][c] = a;
-				
+
 				montaS(l-1,c, a+1);
 				montaS(l+1,c, a+1);
 				montaS(l,c-1, a+1);
@@ -165,15 +246,25 @@
 						break;
 				}
 				if(pc.x==eny.x && pc.y==eny.y) {
-					pc.x = 1;
-					pc.y = 2;
-					eny.x = 18;
-					eny.y = 1;
+					if(pc.espada==true){
+						eny.x = 18;
+						eny.y = 1;
+						pc.espada = false;
+						geraEspada();
+					}else{
+						pc.x = 1;
+						pc.y = 2;
+						eny.x = 18;
+						eny.y = 1;
+					}
+				}
+				if(pc.x==espada.x && pc.y==espada.y){
+					pc.espada = true;
 				}
 			}
 			function desenhaS(){
-				for(var l =0; l < 15; l++){
-					for(var c = 0; c <20; c++){
+				for(var l =0; l < 17; l++){
+					for(var c = 0; c <21; c++){
 						ctx.fillStyle = "red";
 						ctx.fillText(eny.s[l][c], SIZE*c+4, SIZE*l+10);
 					}
@@ -191,10 +282,10 @@
 							//			img, sy, sy , sw, sh, dx, dy, dw, dh
 							ctx.drawImage(imagemPedra, 0*32,0*32, 32, 32,
 										  				c*SIZE,l*SIZE, SIZE,SIZE);
-						}		
+						}
 					}
 				}
-				
+
 			}
 			function moveDireita() {
 				if(mapa[pc.y][pc.x+1]==0) pc.x++;
@@ -233,6 +324,7 @@
 		desenharMapa();
 		desenharPC();
 		desenharEny();
+		desenharEspada();
 		//desenhaS();
 	}
 	document.addEventListener("keydown", executaComando);
