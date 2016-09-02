@@ -6,36 +6,41 @@
 	</head>
 	<body>
 		<h1>Exemplo Canvas 01</h1>
-		<canvas height="544" width="672"></canvas>
+		<canvas height="544" width="672" id="mapa"></canvas>
+		<canvas height="32" width="320" id="nivel"></canvas>
+		<canvas height="32" width="320" id="vida"></canvas>
 
 		<script>
 		var SIZE = 32;
-
 		var imagemGrama = new Image();
 		imagemGrama.src = "images/grass.png";
-
 		var imagemPedra = new Image();
 		imagemPedra.src = "images/rock.png";
-
 		var imagemSoldier = new Image();
 		imagemSoldier.src = "images/soldier.png";
-
 		var imagemGhost = new Image();
 		imagemGhost.src = "images/ghost.png";
-
 		var imagemEscada = new Image();
  		imagemEscada.src = "images/escada.png";
-
 		var imagemEspadaChao = new Image();
 		imagemEspadaChao.src = "images/espadachao.png"
-
-
 		//17 linhas por 21 colunas
+
 		var mapa =[];
 		iniciaMapa();
 
-			var tela = document.querySelector("canvas");
+		var nivel = 1;
+		var vida = 3;
+
+			var tela = document.getElementById('mapa');
 			var ctx = tela.getContext("2d");
+
+			var telaNivel = document.getElementById('nivel');
+			var cty = telaNivel.getContext("2d");
+
+			var telaVida = document.getElementById('vida');
+			var ctz = telaVida.getContext("2d");
+
 			var pc = {
 				x : 1,
 				y : 2,
@@ -46,20 +51,25 @@
 				x : 18,
 				y : 1,
 				s : [],
-				pose : 0
+				pose : 0,
+				vivo: true
 			}
 			var espada = {
 				x: 0,
 				y: 0
 			}
-
+			var escada = {
+				x: 0,
+				y: 0
+			}
 			iniciaS();
 			setTimeout(desenhaTudo, 200);
 			montaS(pc.y,pc.x, 1);
 			//desenhaS();
 			geraPortas();
 			geraEspada();
-
+			geraEscada();
+			posicionaEny();
 			function iniciaMapa(){
 				mapa =[
 					[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -81,15 +91,24 @@
 					[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 				];
 			}
-
 			function desenhaTudo(){
 					desenharMapa();
 					desenharPC();
 					desenharEny();
 					desenharEspada();
+					desenharEscada();
+					desenharVidaNivel();
 					setTimeout(desenhaTudo, 200);
 			}
-
+			function posicionaEny(){
+				do {
+ 						eny.x = Math.floor(21*Math.random());
+ 						eny.y = Math.floor(17*Math.random());
+  			} while (mapa[eny.y][eny.x]==1);
+			if(eny.x - pc.x < 4 && eny.y - pc.y < 4){
+				posicionaEny();
+			}
+			}
 			function geraPortas(){
 				geraPH();
 				geraPV();
@@ -149,6 +168,15 @@
 					porta = 0;
 				}
 			}
+			function geraEscada(){
+ 				do {
+ 						escada.x = Math.floor(21*Math.random());
+ 						escada.y = Math.floor(17*Math.random());
+ 				} while (mapa[escada.y][escada.x]==1);
+ 			}
+			function desenharEscada(){
+ 				ctx.drawImage(imagemEscada, 0*32, 0*32, 32, 64, escada.x*32, escada.y*32-32, 32, 64);
+ 			}
 			function geraEspada(){
 				do {
  						espada.x = Math.floor(21*Math.random());
@@ -181,8 +209,10 @@
 				ctx.lineWidth = 3;
 				ctx.strokeRect(SIZE*eny.x,SIZE*eny.y,SIZE,SIZE);
 				*/
-				ctx.drawImage(imagemGhost, (++eny.pose%3)*40, 2*46, 40, 46,
-											eny.x*32-4, eny.y*32-7, 40, 46);
+				if(eny.vivo==true){
+					ctx.drawImage(imagemGhost, (++eny.pose%3)*40, 2*46, 40, 46,
+												eny.x*32-4, eny.y*32-7, 40, 46);
+				}
 			}
 			function iniciaS(){
 				for(var l =0; l < 17; l++){
@@ -204,12 +234,10 @@
 					return;
 				}
 				eny.s[l][c] = a;
-
 				montaS(l-1,c, a+1);
 				montaS(l+1,c, a+1);
 				montaS(l,c-1, a+1);
 				montaS(l,c+1, a+1);
-
 			}
 			function moveEny() {
 				var atual = eny.s[eny.y][eny.x];
@@ -245,11 +273,19 @@
 						eny.x--;
 						break;
 				}
-				if(pc.x==eny.x && pc.y==eny.y) {
+				if(pc.x == escada.x && pc.y == escada.y){
+					eny.vivo = true;
+					iniciaMapa();
+					geraPortas();
+					geraEspada();
+					geraEscada();
+					posicionaEny();
+					nivel++;
+				}
+				if(pc.x==eny.x && pc.y==eny.y && eny.vivo == true) {
 					if(pc.espada==true){
-						eny.x = 18;
-						eny.y = 1;
 						pc.espada = false;
+						eny.vivo = false;
 						geraEspada();
 					}else{
 						pc.x = 1;
@@ -285,7 +321,15 @@
 						}
 					}
 				}
-
+			}
+			function desenharVidaNivel(){
+				for(var i = 0; i < nivel; i++){
+					cty.fillStyle = "red";
+					cty.fillRect(nivel*SIZE,0,SIZE,SIZE);
+					cty.strokeStyle = "black";
+					cty.lineWidth = 3;
+					cty.strokeRect(nivel*SIZE,0,SIZE,SIZE);
+				}
 			}
 			function moveDireita() {
 				if(mapa[pc.y][pc.x+1]==0) pc.x++;
@@ -325,10 +369,11 @@
 		desenharPC();
 		desenharEny();
 		desenharEspada();
+		desenharEscada();
+		desenharVidaNivel();
 		//desenhaS();
 	}
 	document.addEventListener("keydown", executaComando);
-
 		</script>
 	</body>
 
