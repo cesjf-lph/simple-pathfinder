@@ -24,6 +24,8 @@
  		imagemEscada.src = "images/escada.png";
 		var imagemEspadaChao = new Image();
 		imagemEspadaChao.src = "images/espadachao.png"
+		var imagemCoracao = new Image();
+		imagemCoracao.src = "images/heart.png"
 		//17 linhas por 21 colunas
 
 		var mapa =[];
@@ -31,6 +33,7 @@
 
 		var nivel = 1;
 		var vida = 3;
+		var enyQ = 1;
 
 			var tela = document.getElementById('mapa');
 			var ctx = tela.getContext("2d");
@@ -47,13 +50,7 @@
 				pose : 4,
 				espada : false
 			};
-			var eny = {
-				x : 18,
-				y : 1,
-				s : [],
-				pose : 0,
-				vivo: true
-			}
+			var eny = [];
 			var espada = {
 				x: 0,
 				y: 0
@@ -62,14 +59,34 @@
 				x: 0,
 				y: 0
 			}
+
+			iniciaEny();
+
+			function iniciaEny() {
+				for(var i = 1; i <= 10; i++){
+					eny[i] = {
+						x : 0,
+						y : 0,
+						s : [],
+						pose : 0,
+						vivo: true
+					}
+				}
+			}
+
 			iniciaS();
 			setTimeout(desenhaTudo, 200);
-			montaS(pc.y,pc.x, 1);
+			iniciaMontaS();
 			//desenhaS();
 			geraPortas();
 			geraEspada();
 			geraEscada();
 			posicionaEny();
+			function iniciaMontaS(){
+				for(var i = 1; i <= enyQ; i++){
+					montaS(pc.y,pc.x, 1);
+				}
+			}
 			function iniciaMapa(){
 				mapa =[
 					[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -101,13 +118,15 @@
 					setTimeout(desenhaTudo, 200);
 			}
 			function posicionaEny(){
-				do {
- 						eny.x = Math.floor(21*Math.random());
- 						eny.y = Math.floor(17*Math.random());
-  			} while (mapa[eny.y][eny.x]==1);
-			if(eny.x - pc.x < 4 && eny.y - pc.y < 4){
-				posicionaEny();
-			}
+				for(var i = 1; i <= enyQ; i++){
+					do {
+	 						eny[i].x = Math.floor(21*Math.random());
+	 						eny[i].y = Math.floor(17*Math.random());
+		  			} while (mapa[eny[i].y][eny[i].x]==1);
+					if(eny[i].x - pc.x < 4 && eny[i].y - pc.y < 4){
+						posicionaEny();
+					}
+				}
 			}
 			function geraPortas(){
 				geraPH();
@@ -209,91 +228,106 @@
 				ctx.lineWidth = 3;
 				ctx.strokeRect(SIZE*eny.x,SIZE*eny.y,SIZE,SIZE);
 				*/
-				if(eny.vivo==true){
-					ctx.drawImage(imagemGhost, (++eny.pose%3)*40, 2*46, 40, 46,
-												eny.x*32-4, eny.y*32-7, 40, 46);
+				for(var i = 1; i<= enyQ; i++){
+					if(eny[i].vivo==true){
+						ctx.drawImage(imagemGhost, (++eny[i].pose%3)*40, 2*46, 40, 46,
+													eny[i].x*32-4, eny[i].y*32-7, 40, 46);
+					}
 				}
 			}
 			function iniciaS(){
-				for(var l =0; l < 17; l++){
-					eny.s[l] = [];
-					for(var c = 0; c <21; c++){
-						if(mapa[l][c]==1){
-							eny.s[l][c] = -1;
-						}else {
-							eny.s[l][c] = 99;
+				for(var i = 1; i <= enyQ; i++){
+					for(var l =0; l < 17; l++){
+						eny[i].s[l] = [];
+						for(var c = 0; c <21; c++){
+							if(mapa[l][c]==1){
+								eny[i].s[l][c] = -1;
+							}else {
+								eny[i].s[l][c] = 99;
+							}
 						}
 					}
 				}
 			}
 			function montaS(l,c,a){
-				if(c<0 || l < 0 || c >=21 || l >=17){
-					return;
+				for(var i = 1; i <= enyQ; i++){
+					if(c<0 || l < 0 || c >=21 || l >=17){
+						return;
+					}
+					if(eny[i].s[l][c]<=a){
+						return;
+					}
+					eny[i].s[l][c] = a;
+					montaS(l-1,c, a+1);
+					montaS(l+1,c, a+1);
+					montaS(l,c-1, a+1);
+					montaS(l,c+1, a+1);
 				}
-				if(eny.s[l][c]<=a){
-					return;
-				}
-				eny.s[l][c] = a;
-				montaS(l-1,c, a+1);
-				montaS(l+1,c, a+1);
-				montaS(l,c-1, a+1);
-				montaS(l,c+1, a+1);
 			}
 			function moveEny() {
-				var atual = eny.s[eny.y][eny.x];
-				var menor = atual;
-				var dir = 0;
-				if(eny.s[eny.y-1][eny.x]>0 && eny.s[eny.y-1][eny.x]<menor){
-					menor = eny.s[eny.y-1][eny.x];
-					dir = 1;
-				}
-				if(eny.s[eny.y][eny.x+1]>0 && eny.s[eny.y][eny.x+1]<menor){
-					menor = eny.s[eny.y][eny.x+1];
-					dir = 2;
-				}
-				if(eny.s[eny.y+1][eny.x]>0 && eny.s[eny.y+1][eny.x]<menor){
-					menor = eny.s[eny.y+1][eny.x];
-					dir = 3;
-				}
-				if(eny.s[eny.y][eny.x-1]>0 && eny.s[eny.y][eny.x-1]<menor){
-					menor = eny.s[eny.y][eny.x-1];
-					dir = 4;
-				}
-				switch(dir){
-					case 1:
-						eny.y--;
-						break;
-					case 2:
-						eny.x++;
-						break;
-					case 3:
-						eny.y++;
-						break;
-					case 4:
-						eny.x--;
-						break;
-				}
-				if(pc.x == escada.x && pc.y == escada.y){
-					eny.vivo = true;
-					iniciaMapa();
-					geraPortas();
-					geraEspada();
-					geraEscada();
-					posicionaEny();
-					nivel++;
-				}
-				if(pc.x==eny.x && pc.y==eny.y && eny.vivo == true) {
-					if(pc.espada==true){
-						pc.espada = false;
-						eny.vivo = false;
+				for(var i = 1; i <= enyQ; i++){
+
+					var atual = eny[i].s[eny[i].y][eny[i].x];
+					var menor = atual;
+					var dir = 0;
+					if(eny[i].s[eny[i].y-1][eny[i].x]>0 && eny[i].s[eny[i].y-1][eny[i].x]<menor){
+						menor = eny[i].s[eny[i].y-1][eny[i].x];
+						dir = 1;
+					}
+					if(eny[i].s[eny[i].y][eny[i].x+1]>0 && eny[i].s[eny[i].y][eny[i].x+1]<menor){
+						menor = eny[i].s[eny[i].y][eny[i].x+1];
+						dir = 2;
+					}
+					if(eny[i].s[eny[i].y+1][eny[i].x]>0 && eny[i].s[eny[i].y+1][eny[i].x]<menor){
+						menor = eny[i].s[eny[i].y+1][eny[i].x];
+						dir = 3;
+					}
+					if(eny[i].s[eny[i].y][eny[i].x-1]>0 && eny[i].s[eny[i].y][eny[i].x-1]<menor){
+						menor = eny[i].s[eny[i].y][eny[i].x-1];
+						dir = 4;
+					}
+					switch(dir){
+						case 1:
+							eny[i].y--;
+							break;
+						case 2:
+							eny[i].x++;
+							break;
+						case 3:
+							eny[i].y++;
+							break;
+						case 4:
+							eny[i].x--;
+							break;
+					}
+					if(pc.x == escada.x && pc.y == escada.y){
+						eny[i].vivo = true;
+						iniciaMapa();
+						geraPortas();
 						geraEspada();
-					}else{
-						pc.x = 1;
-						pc.y = 2;
-						eny.x = 18;
-						eny.y = 1;
+						geraEscada();
+						nivel++;
+						if(nivel%2==0){
+							enyQ++;
+						}
+						posicionaEny();
+						iniciaS();
+						iniciaMontaS();
+					}
+					if(pc.x==eny[i].x && pc.y==eny[i].y && eny[i].vivo == true) {
+						if(pc.espada==true){
+							pc.espada = false;
+							eny[i].vivo = false;
+							geraEspada();
+						}else{
+							vida--;
+							pc.x = 1;
+							pc.y = 2;
+							posicionaEny();
+						}
 					}
 				}
+
 				if(pc.x==espada.x && pc.y==espada.y){
 					pc.espada = true;
 				}
@@ -330,6 +364,14 @@
 					cty.lineWidth = 3;
 					cty.strokeRect(nivel*SIZE,0,SIZE,SIZE);
 				}
+				for(var i= 0; i<=5; i++){
+					ctz.fillStyle = "white";
+					ctz.fillRect(i*SIZE,0,SIZE,SIZE);
+				}
+				for(var i = 0; i < vida; i++){
+					ctz.drawImage(imagemCoracao, i*32, 0*32, 32, 32);
+				}
+
 			}
 			function moveDireita() {
 				if(mapa[pc.y][pc.x+1]==0) pc.x++;
